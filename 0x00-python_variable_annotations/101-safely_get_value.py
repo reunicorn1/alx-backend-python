@@ -4,11 +4,11 @@
 """
 from typing import TypeVar, Mapping, Any, Union
 
-V = TypeVar('V')
+T = TypeVar('T')
 
 
 def safely_get_value(dct: Mapping, key: Any,
-                     default: Union[V, None] = None) -> Union[Any, V]:
+                     default: Union[T, None] = None) -> Union[Any, T]:
     """
     This function returns an element from a dictionary if its there
     """
