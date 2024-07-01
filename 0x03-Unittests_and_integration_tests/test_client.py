@@ -123,57 +123,43 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     This is an Integration test for the method
     GithubOrgClient.public_repos only mocking the external requests
     """
-    @classmethod
-    def setUpClass(cls) -> None:
-        """
-        This is a class method to set up the requests.get function
-        behavior to a specific response based on the url passed
-        """
-
-        def side_effect(url: str) -> Mock:
-            """
-            This is a side effect method to be added to the requests.get
-            mock to return a mock response with certain attributes
-            """
-            response_mock = Mock()
-            if url == "https://api.github.com/orgs/google":
-                response_mock.json.return_value = cls.org_payload
-            elif url == "https://api.github.com/orgs/google/repos":
-                response_mock.json.return_value = cls.repos_payload
-            else:
-                response_mock.json.return_value = None
-            return response_mock
-
-        cls.get_patcher = patch("requests.get", side_effect=side_effect)
-        cls.get_patcher.start()
 
     @classmethod
-    def tearDownClass(cls) -> None:
+    def setUpClass(cls):
+        """ Set up class
         """
-        This is a class method to tear down the environment
+        config = {'return_value.json.side_effect': [
+            cls.org_payload, cls.repos_payload,
+            cls.org_payload, cls.repos_payload,
+        ]}
+        cls.get_patcher = patch('requests.get', **config)
+        cls.mock_get = cls.get_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tear down class
         """
         cls.get_patcher.stop()
 
-    def test_public_repos(self) -> None:
-        """
-        This is a test method of public_repos with specific fixation
-        """
-        obj = client.GithubOrgClient("google")
-        self.assertEqual(obj.public_repos(), self.expected_repos)
-        self.assertEqual(obj.org, self.org_payload)
-        self.assertEqual(obj.repos_payload, self.repos_payload)
-        self.assertEqual(obj.public_repos("argument"), [])
+    def test_public_repos(self):
+        """ Integration test: public repos"""
+        test_class = client.GithubOrgClient("google")
 
+        self.assertEqual(test_class.org, self.org_payload)
+        self.assertEqual(test_class.repos_payload, self.repos_payload)
+        self.assertEqual(test_class.public_repos(), self.expected_repos)
+        self.assertEqual(test_class.public_repos("SomeLicence"), [])
+        self.mock_get.assert_called()
 
-    def test_public_repos_with_license(self) -> None:
-        """
-        This is a test method for public repose with an argument
-        "apache-2.0"
-        """
-        output = client.GithubOrgClient("google").public_repos(
-                license="apache-2.0"
-            )
-        self.assertEqual(output, self.apache2_repos)
+    def test_public_repos_with_license(self):
+        """ Integration test for public repos with License """
+        test_class = client.GithubOrgClient("google")
+
+        self.assertEqual(test_class.public_repos(), self.expected_repos)
+        self.assertEqual(test_class.public_repos("SomeLicence"), [])
+        self.assertEqual(
+                test_class.public_repos("apache-2.0"), self.apache2_repos)
+        self.mock_get.assert_called()
 
 
 if __name__ == "__main__":
