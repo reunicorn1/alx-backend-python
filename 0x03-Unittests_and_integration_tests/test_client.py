@@ -124,13 +124,13 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     GithubOrgClient.public_repos only mocking the external requests
     """
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """
         This is a class method to set up the requests.get function
         behavior to a specific response based on the url passed
         """
 
-        def side_effect(url: str):
+        def side_effect(url: str) -> Mock:
             """
             This is a side effect method to be added to the requests.get
             mock to return a mock response with certain attributes
@@ -141,27 +141,27 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             elif url == "https://api.github.com/orgs/google/repos":
                 response_mock.json.return_value = cls.repos_payload
             else:
-                 response_mock.json.return_value = None
+                response_mock.json.return_value = None
             return response_mock
 
         cls.get_patcher = patch("requests.get", side_effect=side_effect)
         cls.get_patcher.start()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """
         This is a class method to tear down the environment
         """
         cls.get_patcher.stop()
 
-    def test_public_repos(self):
+    def test_public_repos(self) -> None:
         """
         This is a test method of public_repos with specific fixation
         """
         output = client.GithubOrgClient("google").public_repos()
         self.assertEqual(output, self.expected_repos)
 
-    def test_public_repos_with_license(self):
+    def test_public_repos_with_license(self) -> None:
         """
         This is a test methos for public repose with an argument
         "apache-2.0"
