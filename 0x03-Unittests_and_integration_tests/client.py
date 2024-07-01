@@ -4,6 +4,7 @@
 from typing import (
     List,
     Dict,
+    Optional
 )
 
 from utils import (
@@ -37,7 +38,7 @@ class GithubOrgClient:
         """Memoize repos payload"""
         return get_json(self._public_repos_url)
 
-    def public_repos(self, license: str = None) -> List[str]:
+    def public_repos(self, license: Optional[str]= None) -> List[str]:
         """Public repos"""
         json_payload = self.repos_payload
         public_repos = [
