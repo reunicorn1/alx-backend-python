@@ -3,8 +3,9 @@
 Unittests and Integration Tests: client.py
 """
 import unittest
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 import client
+import fixtures
 from unittest.mock import Mock, patch, PropertyMock
 from typing import (
     Mapping,
@@ -107,6 +108,67 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         output = client.GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(output, expected)
+
+
+@parameterized_class([
+    {
+        "org_payload": fixtures.TEST_PAYLOAD[0][0],
+        "repos_payload": fixtures.TEST_PAYLOAD[0][1],
+        "expected_repos": fixtures.TEST_PAYLOAD[0][2],
+        "apache2_repos": fixtures.TEST_PAYLOAD[0][3]
+    }
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """
+    This is an Integration test for the method
+    GithubOrgClient.public_repos only mocking the external requests
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        This is a class method to set up the requests.get function
+        behavior to a specific response based on the url passed
+        """
+        cls.get_patcher = patch("requests.get")
+        cls.mock_get = cls.get_patcher.start()
+
+        def side_effect(url: str):
+            """
+            This is a side effect method to be added to the requests.get
+            mock to return a mock response with certain attributes
+            """
+            response_mock = Mock()
+            if url == "https://api.github.com/orgs/google":
+                response_mock.json.return_value = cls.org_payload
+            elif url == "https://api.github.com/orgs/google/repos":
+                response_mock.json.return_value = cls.repos_payload
+            else:
+                response_mock.json.return_value = None
+            return response_mock
+
+        cls.mock_get.side_effect = side_effect
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        This is a class method to tear down the environment
+        """
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """
+        This is a test method of public_repos with specific fixation
+        """
+        output = client.GithubOrgClient("google").public_repos()
+        self.assertEqual(output, self.expected_repos)
+
+    def test_public_repos_with_license(self):
+        """
+        This is a test methos for public repose with an argument
+        "apache-2.0"
+        """
+        output = client.GithubOrgClient("google").public_repos("apache-2.0")
+        self.assertEqual(output, self.apache2_repos)
 
 
 if __name__ == "__main__":
