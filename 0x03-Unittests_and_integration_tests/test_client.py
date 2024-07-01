@@ -155,21 +155,24 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher.stop()
 
     def test_public_repos(self):
-        """
-        This is a test method of public_repos with specific fixation
-        """
-        output = client.GithubOrgClient("google").public_repos()
-        self.assertEqual(output, self.expected_repos)
+        """ Integration test: public repos"""
+        test_class = GithubOrgClient("google")
+
+        self.assertEqual(test_class.org, self.org_payload)
+        self.assertEqual(test_class.repos_payload, self.repos_payload)
+        self.assertEqual(test_class.public_repos(), self.expected_repos)
+        self.assertEqual(test_class.public_repos("SomeLicence"), [])
+        self.mock_get.assert_called()
 
     def test_public_repos_with_license(self):
-        """
-        This is a test methos for public repose with an argument
-        "apache-2.0"
-        """
-        output = client.GithubOrgClient("google").public_repos(
-                license="apache-2.0"
-            )
-        self.assertEqual(output, self.apache2_repos)
+        """ Integration test for public repos with License """
+        test_class = GithubOrgClient("google")
+
+        self.assertEqual(test_class.public_repos(), self.expected_repos)
+        self.assertEqual(test_class.public_repos("SomeLicence"), [])
+        self.assertEqual(
+                test_class.public_repos("apache-2.0"), self.apache2_repos)
+        self.mock_get.assert_called()
 
 
 if __name__ == "__main__":
