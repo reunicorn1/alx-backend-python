@@ -167,7 +167,9 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         This is a test methos for public repose with an argument
         "apache-2.0"
         """
-        output = client.GithubOrgClient("google").public_repos("apache-2.0")
+        output = client.GithubOrgClient("google").public_repos(
+                license="apache-2.0"
+            )
         self.assertEqual(output, self.apache2_repos)
 
 
