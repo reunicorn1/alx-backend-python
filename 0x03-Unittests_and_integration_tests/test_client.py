@@ -158,12 +158,16 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         """
         This is a test method of public_repos with specific fixation
         """
-        output = client.GithubOrgClient("google").public_repos()
-        self.assertEqual(output, self.expected_repos)
+        obj = client.GithubOrgClient("google")
+        self.assertEqual(obj.public_repos(), self.expected_repos)
+        self.assertEqual(obj.org, self.org_payload)
+        self.assertEqual(obj.repos_payload, self.repos_payload)
+        self.assertEqual(obj.public_repos("argument"), [])
+
 
     def test_public_repos_with_license(self) -> None:
         """
-        This is a test methos for public repose with an argument
+        This is a test method for public repose with an argument
         "apache-2.0"
         """
         output = client.GithubOrgClient("google").public_repos(
