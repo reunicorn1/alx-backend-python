@@ -129,8 +129,6 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         This is a class method to set up the requests.get function
         behavior to a specific response based on the url passed
         """
-        cls.get_patcher = patch("requests.get")
-        cls.mock_get = cls.get_patcher.start()
 
         def side_effect(url: str):
             """
@@ -146,7 +144,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
                 response_mock.json.return_value = None
             return response_mock
 
-        cls.mock_get.side_effect = side_effect
+        cls.get_patcher = patch("requests.get", side_effect=side_effect)
+        cls.get_patcher.start()
 
     @classmethod
     def tearDownClass(cls):
