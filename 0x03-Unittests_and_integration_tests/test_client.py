@@ -90,7 +90,7 @@ class TestGithubOrgClient(unittest.TestCase):
                    new_callable=PropertyMock) as mock_public_url:
             mock_public_url.return_value = url
             expected = ["first", "second"]
-            output = client.GithubOrgClient("g").public_repos()
+            output = client.GithubOrgClient("g").public_repos("apache-2.0")
             mock_get.assert_called_once()
             mock_public_url.assert_called_once()
             self.assertEqual(output, expected)
